@@ -15,13 +15,13 @@ import java.util.List;
 )
 public interface StockManagerClient {
 
-    @GetMapping("/sm/stocks/{page}/{size}")
+    @GetMapping("/sm/stocks/all/{page}/{size}")
     Response<List<Stock>> getStocks(
             @PathVariable("page") long page,
             @PathVariable("size") long size
     );
 
-    @GetMapping("/sm/stocks/size")
+    @GetMapping("/sm/stocks/all/size")
     Response<Long> getStockSize();
 }
 
