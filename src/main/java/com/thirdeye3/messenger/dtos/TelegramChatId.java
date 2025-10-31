@@ -20,4 +20,5 @@ public class TelegramChatId {
     private Long id;
     private WorkType workType;
     private String chatId;
+    private String chatName;
 }

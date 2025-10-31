@@ -108,6 +108,7 @@ public class PriceChangeServiceImpl implements PriceChangeService {
             	if(telegramChatId.getWorkType().equals(WorkType.THRESOLD))
             	{
             		telegramMessage.setChatId(telegramChatId.getChatId());
+            		telegramMessage.setChatName(telegramChatId.getChatName());
                     if (!messages.isEmpty()) {
                         StringBuilder message = new StringBuilder();
                         String formattedTime = timeFormatter.format(timeManager.getCurrentTime());
