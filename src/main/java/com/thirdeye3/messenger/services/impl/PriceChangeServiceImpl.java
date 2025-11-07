@@ -99,48 +99,53 @@ public class PriceChangeServiceImpl implements PriceChangeService {
     public void createMessageForUsers() {
         logger.info("Going to create message data");
         List<TelegramMessage> telegramMessages = new ArrayList<>();
+
         for (Map.Entry<Long, ConcurrentLinkedDeque<String>> entry : queueMap.entrySet()) {
-            ConcurrentLinkedDeque<String> messages = entry.getValue();
-            TelegramMessage telegramMessage = new TelegramMessage();
+
+            List<String> messagesCopy = new ArrayList<>(entry.getValue());
+            if (messagesCopy.isEmpty()) continue;
+
             Group group = groupService.getGroup(entry.getKey());
-            for(TelegramChatId telegramChatId : group.getTelegramChatIds())
-            {
-            	if(telegramChatId.getWorkType().equals(WorkType.THRESOLD))
-            	{
-            		telegramMessage.setChatId(telegramChatId.getChatId());
-            		telegramMessage.setChatName(telegramChatId.getChatName());
-                    if (!messages.isEmpty()) {
-                        StringBuilder message = new StringBuilder();
-                        String formattedTime = timeFormatter.format(timeManager.getCurrentTime());
-                        message.append("<b>📊 THIRD EYE 📊</b>\n")
-                               .append("<i>🕒 ").append(formattedTime).append("</i>\n")
-                               .append("<i>Your market update</i>\n\n");
 
-                        while (!messages.isEmpty()) {
-                            String s = messages.pollFirst();
-                            if (message.length() + s.length() > propertyService.getMaximumMessageLength()) {
-                                telegramMessage.getChats().add(message.toString());
-                                message.setLength(0);
-                            }
-                            message.append(s).append("\n\n");
-                        }
-                        message.append("For more details, stay tuned with THIRDEYE updates!\n");
-                        message.append("<b>✅ END OF UPDATES ✅</b>");
+            for (TelegramChatId telegramChatId : group.getTelegramChatIds()) {
 
+                if (telegramChatId.getWorkType().equals(WorkType.THRESOLD)) {
 
-                        if (message.length() > 0) {
+                    TelegramMessage telegramMessage = new TelegramMessage();
+                    telegramMessage.setChatId(telegramChatId.getChatId());
+                    telegramMessage.setChatName(telegramChatId.getChatName());
+
+                    StringBuilder message = new StringBuilder();
+                    String formattedTime = timeFormatter.format(timeManager.getCurrentTime());
+
+                    message.append("<b>📊 THIRD EYE 📊</b>\n")
+                           .append("<i>🕒 ").append(formattedTime).append("</i>\n")
+                           .append("<i>Your market update</i>\n\n");
+
+                    for (String s : messagesCopy) {
+                        if (message.length() + s.length() > propertyService.getMaximumMessageLength()) {
                             telegramMessage.getChats().add(message.toString());
+                            message.setLength(0);
                         }
-                        telegramMessages.add(telegramMessage);
-            	     }
-                 }
-            
+                        message.append(s).append("\n\n");
+                    }
+
+                    message.append("For more details, stay tuned with THIRDEYE updates!\n");
+                    message.append("<b>✅ END OF UPDATES ✅</b>");
+
+                    telegramMessage.getChats().add(message.toString());
+                    telegramMessages.add(telegramMessage);
+                }
             }
+
+            entry.getValue().clear();
         }
+
         if (!telegramMessages.isEmpty()) {
             messageBrokerService.sendMessages("telegramthresold", telegramMessages);
         }
     }
+
 
     @Override
     public void clearMap() {
