@@ -2,7 +2,7 @@ package com.thirdeye3.messenger.services;
 
 public interface PriceChangeService {
 
-	void fetchNewChanges();
+	Boolean fetchNewChanges();
 
 	void createMessageForUsers();
 

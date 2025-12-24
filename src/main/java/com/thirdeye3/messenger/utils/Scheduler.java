@@ -53,14 +53,11 @@ public class Scheduler {
     
     @Scheduled(fixedRateString = "${thirdeye.message.broker.read.rate}")
     public void readMessagesFromMessageBroker() {
-    	priceChangeService.fetchNewChanges();
-        logger.info("Going to read data from message broker");
+    	Boolean find = priceChangeService.fetchNewChanges();
+    	if(find)
+    	{
+    		logger.info("Going to send message to user");
+            priceChangeService.createMessageForUsers();
+    	}
     }
-    
-    @Scheduled(fixedRateString = "${thirdeye.message.sendgap}")
-    public void sendMessageToUser() {
-    	priceChangeService.createMessageForUsers();
-        logger.info("Going to send message to user");
-    }
-
 }

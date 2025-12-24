@@ -51,8 +51,12 @@ public class PriceChangeServiceImpl implements PriceChangeService {
     private SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
 
     @Override
-    public void fetchNewChanges() {
+    public Boolean fetchNewChanges() {
         List<Message<PriceChange>> messages = messageBrokerService.getMessage("thresold");
+        if(messages == null || messages.size() == 0)
+        {
+        	return false;
+        }
         for (Message<PriceChange> message : messages) {
             PriceChange priceChange = message.getMessage();
 
@@ -93,6 +97,7 @@ public class PriceChangeServiceImpl implements PriceChangeService {
                 .computeIfAbsent(priceChange.getGroupId(), k -> new ConcurrentLinkedDeque<>())
                 .addLast(sb.toString());
         }
+        return true;
     }
 
     @Override
